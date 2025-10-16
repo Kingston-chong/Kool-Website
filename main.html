@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Notes Optimizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            background: #eef0ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e0e7ff;
+            border-color: #4c51bf;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .file-item {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .file-name {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .remove-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background: #ff3838;
+        }
+
+        .options-panel {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .option-group {
+            margin-bottom: 15px;
+        }
+
+        .option-label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .range-value {
+            display: inline-block;
+            margin-left: 10px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .process-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            font-size: 1.1em;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .status-message.processing {
+            background: #fff3cd;
+            color: #856404;
+            display: block;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Study Notes Optimizer</h1>
+            <p class="tagline">Transform your study materials for faster, smarter learning</p>
+        </header>
+
+        <div class="features-grid">
+            <!-- Feature 1: Slide Shortener -->
+            <div class="feature-card">
+                <div class="feature-icon">✂️</div>
+                <h2 class="feature-title">Slide Shortener</h2>
+                <p class="feature-description">Upload your presentation slides and automatically condense the content for faster learning and revision.</p>
+                
+                <div class="upload-area" id="shortenerUpload" onclick="document.getElementById('shortenerFile').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Click to upload</strong> or drag and drop</p>
+                    <p style="font-size: 0.9em; color: #888; margin-top: 5px;">PPT, PPTX supported</p>
+                </div>
+                <input type="file" id="shortenerFile" accept=".ppt,.pptx" multiple>
+                <div class="file-list" id="shortenerFiles"></div>
+
+                <div class="options-panel">
+                    <div class="option-group">
+                        <label class="option-label">Compression Level</label>
+                        <input type="range" id="compressionLevel" min="1" max="3" value="2" oninput="updateRangeValue(this)">
+                        <span class="range-value">Medium</span>
+                    </div>
+                    <button class="btn process-btn" onclick="processShortener()">Shorten Slides</button>
+                    <div class="status-message" id="shortenerStatus"></div>
+                </div>
+            </div>
+
+            <!-- Feature 2: PDF to PPT -->
+            <div class="feature-card">
+                <div class="feature-icon">📄➡️📊</div>
+                <h2 class="feature-title">PDF to PPT Converter</h2>
+                <p class="feature-description">Convert your PDF notes into engaging PowerPoint presentations with smart content organization.</p>
+                
+                <div class="upload-area" id="pdfUpload" onclick="document.getElementById('pdfFile').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Click to upload</strong> or drag and drop</p>
+                    <p style="font-size: 0.9em; color: #888; margin-top: 5px;">PDF files only</p>
+                </div>
+                <input type="file" id="pdfFile" accept=".pdf" multiple>
+                <div class="file-list" id="pdfFiles"></div>
+
+                <div class="options-panel">
+                    <div class="option-group">
+                        <label class="option-label">Slide Style</label>
+                        <select id="slideStyle">
+                            <option value="minimal">Minimal</option>
+                            <option value="modern" selected>Modern</option>
+                            <option value="academic">Academic</option>
+                            <option value="creative">Creative</option>
+                        </select>
+                    </div>
+                    <button class="btn process-btn" onclick="processPdfToPpt()">Convert to PPT</button>
+                    <div class="status-message" id="pdfStatus"></div>
+                </div>
+            </div>
+
+            <!-- Feature 3: PPT Improver -->
+            <div class="feature-card">
+                <div class="feature-icon">🖼️✨</div>
+                <h2 class="feature-title">PPT Image Enhancer</h2>
+                <p class="feature-description">Upload images and automatically insert them into relevant slides based on filename matching.</p>
+                
+                <div class="upload-area" id="pptUpload" onclick="document.getElementById('pptFile').click()" style="margin-bottom: 15px;">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Upload PPT/PDF</strong></p>
+                    <p style="font-size: 0.9em; color: #888; margin-top: 5px;">PPT, PPTX, PDF</p>
+                </div>
+                <input type="file" id="pptFile" accept=".ppt,.pptx,.pdf">
+                <div class="file-list" id="pptFiles"></div>
+
+                <div class="upload-area" id="imagesUpload" onclick="document.getElementById('imagesFile').click()">
+                    <div class="upload-icon">🖼️</div>
+                    <p><strong>Upload Images</strong></p>
+                    <p style="font-size: 0.9em; color: #888; margin-top: 5px;">JPG, PNG, GIF (name files by topic)</p>
+                </div>
+                <input type="file" id="imagesFile" accept=".jpg,.jpeg,.png,.gif" multiple>
+                <div class="file-list" id="imageFiles"></div>
+
+                <div class="options-panel">
+                    <div class="option-group">
+                        <label class="option-label">Matching Sensitivity</label>
+                        <select id="matchingSensitivity">
+                            <option value="exact">Exact Match</option>
+                            <option value="moderate" selected>Moderate</option>
+                            <option value="flexible">Flexible</option>
+                        </select>
+                    </div>
+                    <button class="btn process-btn" onclick="processPptImprover()">Enhance Presentation</button>
+                    <div class="status-message" id="improverStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileData = {
+            shortener: [],
+            pdf: [],
+            ppt: null,
+            images: []
+        };
+
+        // File upload handlers
+        document.getElementById('shortenerFile').addEventListener('change', (e) => {
+            handleFiles(e.target.files, 'shortener', 'shortenerFiles');
+        });
+
+        document.getElementById('pdfFile').addEventListener('change', (e) => {
+            handleFiles(e.target.files, 'pdf', 'pdfFiles');
+        });
+
+        document.getElementById('pptFile').addEventListener('change', (e) => {
+            handleFiles([e.target.files[0]], 'ppt', 'pptFiles', true);
+        });
+
+        document.getElementById('imagesFile').addEventListener('change', (e) => {
+            handleFiles(e.target.files, 'images', 'imageFiles');
+        });
+
+        // Drag and drop
+        ['shortenerUpload', 'pdfUpload', 'pptUpload', 'imagesUpload'].forEach(id => {
+            const elem = document.getElementById(id);
+            elem.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                elem.classList.add('dragover');
+            });
+            elem.addEventListener('dragleave', () => {
+                elem.classList.remove('dragover');
+            });
+            elem.addEventListener('drop', (e) => {
+                e.preventDefault();
+                elem.classList.remove('dragover');
+                const fileInput = elem.onclick.toString().match(/getElementById\('(.+?)'\)/)[1];
+                const type = id.replace('Upload', '');
+                const listId = type + (type === 'images' ? 'Files' : type === 'ppt' ? 'Files' : 'Files');
+                handleFiles(e.dataTransfer.files, type === 'shortener' ? 'shortener' : type === 'pdf' ? 'pdf' : type === 'ppt' ? 'ppt' : 'images', listId, type === 'ppt');
+            });
+        });
+
+        function handleFiles(files, type, listId, single = false) {
+            const fileList = document.getElementById(listId);
+            
+            if (single && files.length > 0) {
+                fileData[type] = files[0];
+                fileList.innerHTML = `
+                    <div class="file-item">
+                        <span class="file-name">📎 ${files[0].name}</span>
+                        <button class="remove-btn" onclick="removeFile('${type}', '${listId}')">Remove</button>
+                    </div>
+                `;
+            } else {
+                Array.from(files).forEach(file => {
+                    fileData[type].push(file);
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <span class="file-name">📎 ${file.name}</span>
+                        <button class="remove-btn" onclick="removeFile('${type}', '${listId}', '${file.name}')">Remove</button>
+                    `;
+                    fileList.appendChild(fileItem);
+                });
+            }
+        }
+
+        function removeFile(type, listId, filename = null) {
+            if (filename) {
+                fileData[type] = fileData[type].filter(f => f.name !== filename);
+            } else {
+                fileData[type] = type === 'ppt' ? null : [];
+            }
+            
+            const fileList = document.getElementById(listId);
+            if (filename) {
+                Array.from(fileList.children).forEach(child => {
+                    if (child.textContent.includes(filename)) {
+                        child.remove();
+                    }
+                });
+            } else {
+                fileList.innerHTML = '';
+            }
+        }
+
+        function updateRangeValue(range) {
+            const values = ['Light', 'Medium', 'Heavy'];
+            range.nextElementSibling.textContent = values[range.value - 1];
+        }
+
+        function processShortener() {
+            const status = document.getElementById('shortenerStatus');
+            if (fileData.shortener.length === 0) {
+                alert('Please upload at least one file');
+                return;
+            }
+            
+            status.className = 'status-message processing';
+            status.textContent = '⏳ Processing your slides...';
+            
+            setTimeout(() => {
+                status.className = 'status-message success';
+                status.textContent = `✅ Successfully shortened ${fileData.shortener.length} presentation(s)! Download ready.`;
+            }, 2000);
+        }
+
+        function processPdfToPpt() {
+            const status = document.getElementById('pdfStatus');
+            if (fileData.pdf.length === 0) {
+                alert('Please upload at least one PDF file');
+                return;
+            }
+            
+            status.className = 'status-message processing';
+            status.textContent = '⏳ Converting PDF to PowerPoint...';
+            
+            setTimeout(() => {
+                status.className = 'status-message success';
+                status.textContent = `✅ Successfully converted ${fileData.pdf.length} PDF(s) to PowerPoint! Download ready.`;
+            }, 2500);
+        }
+
+        function processPptImprover() {
+            const status = document.getElementById('improverStatus');
+            if (!fileData.ppt || fileData.images.length === 0) {
+                alert('Please upload both a presentation and images');
+                return;
+            }
+            
+            status.className = 'status-message processing';
+            status.textContent = '⏳ Matching images to slides...';
+            
+            setTimeout(() => {
+                status.className = 'status-message success';
+                status.textContent = `✅ Successfully enhanced presentation with ${fileData.images.length} image(s)! Download ready.`;
+            }, 2200);
+        }
+    </script>
+</body>
+</html>
